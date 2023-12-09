@@ -1,4 +1,5 @@
 #!/opt/homebrew/bin/bash
+[ $# -lt 1 ] && echo "Missing input!" && exit 1
 
 RED_COUNT=12
 GREEN_COUNT=13
@@ -36,11 +37,8 @@ function process_game() {
 
             done
         done
-        [[ ${max_red} -gt ${RED_COUNT} ]] && return 1
-        [[ ${max_green} -gt ${GREEN_COUNT} ]] && return 1
-        [[ ${max_blue} -gt ${BLUE_COUNT} ]] && return 1
-        return 0
-    } && echo ${@}
+        echo "${max_red}*${max_green}*${max_blue}" | bc
+    }
 }
 
 function process_all_games() {
@@ -59,7 +57,4 @@ function sum() {
     awk '{sum += $1 } END { print sum}'
 }
 
-process_all_games | get_game_id #| sum
-
-
-# 2727
+cat $1 | process_all_games | get_game_id | sum
