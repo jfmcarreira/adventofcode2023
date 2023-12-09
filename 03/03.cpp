@@ -4,10 +4,10 @@
 #include <iostream>
 #include <iterator>
 #include <numeric>
-#include <optional>
 #include <ranges>
-#include <string>
 #include <vector>
+
+#include "../common/common.hpp"
 
 struct EngineSymbol
 {
@@ -21,17 +21,6 @@ struct EnginePart
     std::int64_t number;
     std::vector<EngineSymbol> symbols;
 };
-
-auto check_numbers(std::string_view line) noexcept -> std::pair<std::int64_t, std::optional<std::int64_t>>
-{
-    if (!std::isdigit(line[0])) return std::make_pair(1, std::nullopt);
-    std::size_t index{1};
-    for (; index < line.size(); ++index) {
-        auto c = line[index];
-        if (!std::isdigit(c)) break;
-    }
-    return std::make_pair(index, std::stoll(line.substr(0, index).data()));
-}
 
 auto check_part(const EnginePart& ref_part, std::span<EnginePart> remaining_parts) -> std::int64_t
 {
