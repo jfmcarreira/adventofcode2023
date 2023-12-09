@@ -22,3 +22,4 @@ check_solution 04 11827296
 #check_solution 05 77435348
 check_solution 06 30125202
 check_solution 07 249781879
+check_solution 08 13524038372771
