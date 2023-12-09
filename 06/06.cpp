@@ -37,6 +37,12 @@ auto parse_line_numbers(std::string_view current_line) noexcept
     return numbers;
 }
 
+auto parse_line_single_number(std::string line) noexcept
+{
+    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+    return parse_line_numbers(line);
+}
+
 auto calculate_distance(std::int64_t load_time, std::int64_t duration)
 {
     return (duration - load_time) * load_time;
@@ -52,10 +58,12 @@ int main(int argc, char* argv[])
     std::ifstream input_file(argv[1], std::ios_base::in);
 
     std::string line;
+
+    // Part One use parse_line_numbers
     std::getline(input_file, line);
-    auto race_duration = parse_line_numbers(line.substr(line.find_first_of(':')));
+    auto race_duration = parse_line_single_number(line.substr(line.find_first_of(':')));
     std::getline(input_file, line);
-    auto distance_to_beat = parse_line_numbers(line.substr(line.find_first_of(':')));
+    auto distance_to_beat = parse_line_single_number(line.substr(line.find_first_of(':')));
 
     std::int64_t result_part_one{1};
     for (std::size_t i = 0; i < race_duration.size(); ++i) {
