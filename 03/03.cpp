@@ -1,7 +1,4 @@
 
-#include <__algorithm/ranges_any_of.h>
-#include <__algorithm/ranges_transform.h>
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -141,5 +138,3 @@ int main(int argc, char* argv[])
     std::cout << result_part_two << std::endl;
     return 0;
 }
-
-// 528799
