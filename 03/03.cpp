@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
         acc += part.number;
         return acc;
     });
+    std::cout << result_part_one << std::endl;
 
     std::int64_t result_part_two{0};
     auto it = engine_parts.begin();

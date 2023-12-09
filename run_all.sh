@@ -11,7 +11,7 @@ function check_solution(){
         g++ --std=c++20 -Wall -O0 -g ${day}.cpp -o ${day}
         command=./${day}
     fi
-    [[ $(${command} input) == "$2" ]] && echo "Solution for day ${day} correct"
+    [[ $(${command} input | tail -1) == "$2" ]] && echo "Solution for day ${day} correct"
     popd > /dev/null
 }
 
