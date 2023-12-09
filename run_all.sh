@@ -8,7 +8,7 @@ function check_solution(){
         command=./${day}.sh
     elif [[ -f ${day}.cpp ]]
     then
-        g++ --std=c++20 -Wall -O0 -g ${day}.cpp -o ${day}
+        g++ --std=c++20 -Wall -O3 ${day}.cpp -o ${day}
         command=./${day}
     fi
     [[ $(${command} input | tail -1) == "$2" ]] && echo "Solution for day ${day} correct"
@@ -18,3 +18,4 @@ function check_solution(){
 check_solution 01 54578
 check_solution 02 56580
 check_solution 03 84907174
+check_solution 04 11827296
