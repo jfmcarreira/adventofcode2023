@@ -1,4 +1,7 @@
 #!/opt/homebrew/bin/bash
+
+source ../common/common.sh
+
 [ $# -lt 1 ] && echo "Missing input!" && exit 1
 
 function to_lower() {
@@ -19,10 +22,6 @@ function duplicate_line() {
 
 function fetch_first_and_last() {
     sed -n 's/\(.\).*\(.\)/\1\2/p'
-}
-
-function sum() {
-    awk '{sum += $1 } END { print sum}'
 }
 
 cat $1 | to_lower | replace_text_as_numbers | remove_letters  | duplicate_line | fetch_first_and_last  | sum

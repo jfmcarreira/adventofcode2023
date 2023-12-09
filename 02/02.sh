@@ -1,4 +1,8 @@
 #!/opt/homebrew/bin/bash
+
+source ../common/common.sh
+
+
 [ $# -lt 1 ] && echo "Missing input!" && exit 1
 
 RED_COUNT=12
@@ -50,11 +54,6 @@ function process_all_games() {
 
 function get_game_id() {
     awk -F ':' '{print $1}' | sed 's/Game //g'
-}
-
-
-function sum() {
-    awk '{sum += $1 } END { print sum}'
 }
 
 cat $1 | process_all_games | get_game_id | sum
