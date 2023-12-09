@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -11,7 +12,64 @@
 
 #include "../common/common.hpp"
 
-constexpr std::array kCardsOrder{'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'};
+constexpr auto kJoker = 'J';
+constexpr std::array kCardsOrder{'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', kJoker};
+
+auto card_value(char card) noexcept
+{
+    return std::distance(kCardsOrder.begin(), std::ranges::find(kCardsOrder, card));
+}
+
+struct CardSeq
+{
+    std::int64_t count;
+    char card;
+
+    auto operator==(const CardSeq&) const noexcept -> bool = default;
+};
+
+auto card_seq_comparison(const CardSeq& lhs, const CardSeq& rhs) noexcept
+{
+    if (lhs.count != rhs.count) return lhs.count > rhs.count;
+    return card_value(lhs.card) > card_value(rhs.card);
+}
+
+auto hand_rank(std::span<const char> sorted_cards, std::span<const CardSeq> seq) noexcept
+{
+    auto joker_count = std::ranges::count(sorted_cards, kJoker);
+
+    if (seq[0].count + joker_count >= 5) return 1;
+    if (seq[0].count + joker_count >= 4) return 2;
+    if (seq[0].count + joker_count == 3) {
+        if (seq[1].count == 2) return 3;
+        return 4;
+    }
+    if (std::ranges::count(seq, 2, &CardSeq::count) == 2) return 5;
+    if (seq[0].count + joker_count == 2) return 6;
+    return 7;
+}
+
+auto check_card_sequence(std::span<const char> sorted_cards) noexcept -> std::int64_t
+{
+    auto first = sorted_cards[0];
+    if (first == kJoker) return 1;
+    auto seq_end = std::ranges::find_if(sorted_cards, [&first](auto c) { return c != first; });
+    return std::distance(sorted_cards.begin(), seq_end);
+}
+
+auto card_seq(std::span<const char> sorted_cards) noexcept
+{
+    std::vector<CardSeq> seq;
+    seq.reserve(sorted_cards.size());
+    std::int64_t index{0};
+    while (index < sorted_cards.size()) {
+        auto count = check_card_sequence(sorted_cards.subspan(index));
+        seq.push_back({.count = count, .card = sorted_cards[index]});
+        index += count;
+    }
+    std::ranges::sort(seq, card_seq_comparison);
+    return seq;
+}
 
 struct Hand
 {
@@ -19,42 +77,6 @@ struct Hand
     std::int64_t bid;
     std::int64_t rank;
 };
-
-auto card_value(auto card) noexcept
-{
-    return std::distance(kCardsOrder.begin(), std::ranges::find(kCardsOrder, card));
-}
-
-auto hand_rank(const std::vector<char>& hand, const std::vector<std::int64_t>& seq) noexcept
-{
-    if (seq[0] == 5) return 1;
-    if (seq[0] == 4 || seq[1] == 4) return 2;
-    if (std::ranges::find(seq, 3) != seq.end()) {
-        if (std::ranges::find(seq, 2) != seq.end()) return 3;
-        return 4;
-    }
-    if (std::ranges::count(seq, 2) == 2) return 5;
-    if (*std::ranges::max_element(seq) == 1) return 7;
-    return 6;
-}
-
-auto check_duplicates(std::span<const char> hand) noexcept
-{
-    return std::distance(hand.begin(), std::ranges::find_if(hand, [first = hand[0]](auto c) { return c != first; }));
-}
-
-auto card_seq(std::span<const char> hand) noexcept
-{
-    std::vector<std::int64_t> seq;
-    seq.reserve(hand.size());
-    std::int64_t index{0};
-    while (index < hand.size()) {
-        auto count = check_duplicates(hand.subspan(index));
-        seq.push_back(count);
-        index += count;
-    }
-    return seq;
-}
 
 auto parse_hand(std::string_view line) noexcept
 {
@@ -100,24 +122,22 @@ int main(int argc, char* argv[])
         return false;
     });
 
-    for (auto& hand : hands) {
-        for (auto c : hand.cards) {
-            std::cout << c << ",";
-        }
-        std::cout << "|";
-        std::cout << hand.bid;
-        std::cout << "|";
-        std::cout << hand.rank;
-        std::cout << "|";
-        std::cout << std::endl;
-    }
+    // for (auto& hand : hands) {
+    //     for (auto c : hand.cards) {
+    //         std::cout << c << ",";
+    //     }
+    //     std::cout << "|";
+    //     std::cout << hand.bid;
+    //     std::cout << "|";
+    //     std::cout << hand.rank;
+    //     std::cout << "|";
+    //     std::cout << std::endl;
+    // }
 
-    std::int64_t result_part_one{0};
+    std::int64_t result{0};
     for (std::int64_t i = 0; i < hands.size(); ++i) {
-        result_part_one += hands[i].bid * (i + 1);
+        result += hands[i].bid * (i + 1);
     }
-    std::cout << result_part_one << std::endl;
+    std::cout << result << std::endl;
     return 0;
 }
-
-// 251058093
