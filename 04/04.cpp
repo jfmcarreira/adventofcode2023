@@ -28,7 +28,7 @@ auto check_numbers(std::string_view line) noexcept -> std::pair<std::int64_t, st
     return std::make_pair(index, std::stoll(line.substr(0, index).data()));
 }
 
-auto parse_numbers(std::string_view current_line) noexcept
+auto parse_line_numbers(std::string_view current_line) noexcept
 {
     std::vector<std::int64_t> numbers;
     std::int64_t index{0};
@@ -57,8 +57,8 @@ auto parse_card(std::string_view line) noexcept
     assert(numbers_sep != std::string::npos);
     return Card{
         .id = std::stoll(line.substr(0, card_sep).substr(id_sep).data()),
-        .game_numbers = parse_numbers(numbers.substr(0, numbers_sep)),
-        .winning_numbers = parse_numbers(numbers.substr(numbers_sep))};
+        .game_numbers = parse_line_numbers(numbers.substr(0, numbers_sep)),
+        .winning_numbers = parse_line_numbers(numbers.substr(numbers_sep))};
 }
 
 auto card_points(const Card& card) -> std::int64_t
@@ -115,24 +115,21 @@ int main(int argc, char* argv[])
 
     std::vector<std::int64_t> cards_points;
     std::ranges::transform(cards, std::back_inserter(cards_points), card_points);
-
     auto result_part_one = std::accumulate(cards_points.begin(), cards_points.end(), 0);
     std::cout << result_part_one << std::endl;
 
-    std::int64_t result_part_two{0};
-    auto duplicated_cards = cards;
-    duplicated_cards.reserve(duplicated_cards.size() + cards.size() * cards.front().game_numbers.size());
+    std::vector<std::int64_t> cards_matches;
+    std::ranges::transform(cards, std::back_inserter(cards_matches), card_matches);
 
+    auto duplicated_cards = cards;
     for (std::int64_t c = 0; c < duplicated_cards.size(); ++c) {
-        ++result_part_two;
         const auto card = duplicated_cards[c];
-        auto matches = card_matches(card);
-        for (std::int64_t i = 0; i < matches; ++i) {
+        for (std::int64_t i = 0; i < cards_matches[card.id - 1]; ++i) {
             assert(card.id + i < cards.size());
             duplicated_cards.push_back(cards[card.id + i]);
         }
     }
-    std::cout << result_part_two << std::endl;
+    std::cout << duplicated_cards.size() << std::endl;
     return 0;
 }
 
