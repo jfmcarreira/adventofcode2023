@@ -1,13 +1,6 @@
-#include <__algorithm/ranges_any_of.h>
-#include <__algorithm/ranges_count.h>
-#include <__ranges/drop_view.h>
-#include <__ranges/elements_view.h>
-#include <__ranges/reverse_view.h>
-#include <__ranges/single_view.h>
-#include <sys/_types/_int64_t.h>
-
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>

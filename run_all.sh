@@ -8,7 +8,7 @@ function check_solution(){
         command=./${day}.sh
     elif [[ -f ${day}.cpp ]]
     then
-        g++ --std=c++20 -Wall -O3 ${day}.cpp -o ${day}
+        make -C ../build ${day}
         command=./${day}
     fi
     [[ $(${command} input | tail -1) == "$2" ]] && echo "Solution for day ${day} correct"
