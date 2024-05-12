@@ -15,12 +15,7 @@
 #include <type_traits>
 #include <vector>
 
-struct Point
-{
-    std::int64_t x{0};
-    std::int64_t y{0};
-    auto operator==(const Point&) const noexcept -> bool = default;
-};
+#include "../common/common.hpp"
 
 enum class Direction
 {

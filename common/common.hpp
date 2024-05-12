@@ -5,6 +5,18 @@
 #include <string_view>
 #include <utility>
 
+struct Point
+{
+    std::int64_t x{0};
+    std::int64_t y{0};
+    auto operator==(const Point&) const noexcept -> bool = default;
+    auto operator<(const Point& rhs) const noexcept -> bool
+    {
+        if (y == rhs.y) return x < rhs.x;
+        return y < rhs.y;
+    }
+};
+
 inline auto check_numbers(std::string_view line) noexcept -> std::pair<std::int64_t, std::optional<std::int64_t>>
 {
     if (!std::isdigit(line[0])) return std::make_pair(1, std::nullopt);
