@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.27)
-project(adventofcode CXX)
-
 set(CMAKE_C_COMPILER /opt/homebrew/Cellar/llvm@16/16.0.6/bin/clang)
 set(CMAKE_CXX_COMPILER /opt/homebrew/Cellar/llvm@16/16.0.6/bin/clang++)
 
