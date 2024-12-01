@@ -1,12 +1,7 @@
 #include <algorithm>
-#include <cassert>
-#include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <iterator>
-#include <numeric>
-#include <ostream>
-#include <ranges>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -19,6 +14,15 @@ auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
         parsing(line);
     }
 }
+
+auto find_number_repetitions(const std::span<const std::int64_t> range, std::int64_t number) noexcept -> std::int64_t
+{
+    auto first = std::ranges::find(range, number);
+    if (first == range.end()) return 0;
+    auto last = std::ranges::find_last(range, number).begin();
+    auto count = std::distance(first, last) + 1;
+    return count;
+};
 
 int main(int argc, char* argv[])
 {
@@ -38,18 +42,11 @@ int main(int argc, char* argv[])
     };
 
     parse_file(argv[1], parsing);
-
-    std::ranges::sort(left_numbers);
     std::ranges::sort(right_numbers);
-
-    auto line_count = std::min(left_numbers.size(), right_numbers.size());
-
-    std::int64_t result{0};
-    for (std::int64_t i = 0; i < line_count; ++i) {
-        result += std::abs(right_numbers[i] - left_numbers[i]);
-    }
-
+    auto result = std::ranges::fold_left(left_numbers, 0, [&](const auto& sum, const auto& elem) {
+        auto count = find_number_repetitions(right_numbers, elem);
+        return sum + count * elem;
+    });
     std::cout << result << std::endl;
-
     return 0;
 }
