@@ -49,17 +49,41 @@ struct Report
     std::vector<std::int64_t> levels;
 };
 
-auto validate(const Report& report) noexcept
+auto validate(const std::vector<std::int64_t>& levels) noexcept
 {
-    auto is_increasing = std::ranges::is_sorted(report.levels, std::greater<>{});
-    auto is_decreasing = std::ranges::is_sorted(report.levels, std::less<>{});
+    auto is_increasing = std::ranges::is_sorted(levels, std::greater<>{});
+    auto is_decreasing = std::ranges::is_sorted(levels, std::less<>{});
     if (!is_increasing && !is_decreasing) return false;
 
-    for (auto i = 1ULL; i < report.levels.size(); ++i) {
-        auto diff = std::abs(report.levels[i - 1] - report.levels[i]);
+    for (auto i = 1ULL; i < levels.size(); ++i) {
+        auto diff = std::abs(levels[i - 1] - levels[i]);
         if (diff < 1 || diff > 3) return false;
     }
     return true;
+}
+
+auto copy_unless(
+    const std::vector<std::int64_t>& source,
+    std::size_t discard_index,
+    std::vector<std::int64_t>& destination) noexcept
+{
+    for (auto i = 0; i < source.size(); ++i) {
+        if (i == discard_index) continue;
+        destination.push_back(source[i]);
+    }
+}
+
+auto validate(const Report& report) noexcept
+{
+    if (validate(report.levels)) return true;
+    std::vector<std::int64_t> levels;
+    levels.reserve(report.levels.size() - 1);
+    for (auto i = 0; i < report.levels.size(); ++i) {
+        levels.clear();
+        copy_unless(report.levels, i, levels);
+        if (validate(levels)) return true;
+    }
+    return false;
 }
 
 int main(int argc, char* argv[])
