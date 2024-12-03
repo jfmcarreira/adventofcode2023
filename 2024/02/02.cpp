@@ -1,10 +1,7 @@
-#include <__algorithm/fold.h>
-
 #include <algorithm>
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <span>
 #include <string>
 #include <vector>
 
