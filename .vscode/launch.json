@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Test puzzle",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "test_input",
+            ],
+            "cwd": "${command:cmake.launchTargetDirectory}",
+        },
+        {
+            "name": "Run puzzle",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "input",
+            ],
+            "cwd": "${command:cmake.launchTargetDirectory}",
+        }
+    ]
+}
