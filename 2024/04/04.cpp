@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -14,17 +15,23 @@ auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
     }
 }
 
-constexpr std::string_view kLookupWord{"XMAS"};
+constexpr std::string_view kLookupWord{"MAS"};
 
 using Input = std::vector<std::string>;
 
 struct Coord
 {
-    std::int64_t x{0};
     std::int64_t y{0};
+    std::int64_t x{0};
 
     auto operator==(const Coord&) const noexcept -> bool = default;
 };
+
+auto operator<(const Coord& lhs, const Coord& rhs) noexcept
+{
+    if (lhs.y == rhs.y) return lhs.x < rhs.x;
+    return lhs.y < rhs.y;
+}
 
 struct Direction
 {
@@ -45,20 +52,43 @@ constexpr std::array kDirections{
     Direction{-1, 0},
 };
 
+auto x_cross(const Direction& lhs, const Direction& rhs) noexcept
+{
+    return (lhs.x == rhs.x && lhs.y == -rhs.y) || (lhs.x == -rhs.x && lhs.y == rhs.y);
+}
+
+auto is_diagonal(const Direction& dir) noexcept
+{
+    return !(dir.x == 0 || dir.y == 0);
+}
+
 struct Word
 {
     Coord position;
     Direction dir;
+    Coord center;
 };
+
+auto operator<(const Word& lhs, const Word& rhs) noexcept
+{
+    if (lhs.center != rhs.center) return lhs.center < rhs.center;
+    auto lhs_diagonal = is_diagonal(lhs.dir);
+    auto rhs_diagonal = is_diagonal(rhs.dir);
+    if (lhs_diagonal != rhs_diagonal) return lhs_diagonal;
+    return false;
+}
 
 auto operator+(const Coord& coord, const Direction& dir) noexcept
 {
-    return Coord{.x = coord.x + dir.x, .y = coord.y + dir.y};
+    return Coord{.y = coord.y + dir.y, .x = coord.x + dir.x};
 }
 
 auto operator*(const Direction& dir, std::int64_t scale) noexcept
 {
-    return Direction{.x = dir.x * scale, .y = dir.y * scale};
+    return Direction{
+        .x = dir.x * scale,
+        .y = dir.y * scale,
+    };
 }
 
 auto is_inside(const Input& input, const Coord& pos) noexcept
@@ -99,13 +129,24 @@ int main(int argc, char* argv[])
 
     for (std::int64_t y = 0; y < line_count; ++y) {
         for (std::int64_t x = 0; x < line_width; ++x) {
-            Coord start{x, y};
+            Coord start{y, x};
             for (const auto& dir : kDirections) {
                 if (!lookup(input, start, dir)) continue;
-                found_words.emplace_back(start, dir);
+                found_words.emplace_back(start, dir, start + dir);
             }
         }
     }
-    std::cout << found_words.size() << std::endl;
+    std::ranges::sort(found_words, std::less<>{});
+    std::vector<Coord> interceptions;
+    for (std::int64_t i = 0; i < std::ssize(found_words) - 1; ++i) {
+        const auto& current = found_words[i];
+        const auto& next = found_words[i + 1];
+        if (current.center != next.center) continue;
+        if (x_cross(current.dir, next.dir)) {
+            interceptions.push_back(current.center);
+            continue;
+        }
+    }
+    std::cout << interceptions.size() << std::endl;
     return 0;
 }
