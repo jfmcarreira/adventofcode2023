@@ -24,6 +24,7 @@ auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
 }
 
 constexpr auto kGuardSymbol = '^';
+constexpr auto kNormalSymbol = '.';
 constexpr auto kObstructionsSymbol = '#';
 constexpr auto kCheckedSymbol = 'X';
 
@@ -87,7 +88,25 @@ struct Guard
 {
     Coord pos;
     Direction dir;
+
+    auto operator==(const Guard&) const noexcept -> bool = default;
 };
+
+auto is_loop(const Input& input, Guard guard)
+{
+    std::vector<Guard> sequence;
+    while (is_inside(input, guard.pos)) {
+        sequence.push_back(guard);
+        auto new_pos = guard.pos + guard.dir;
+        if (is_obstruction(input, new_pos)) {
+            guard.dir = rotate(guard.dir);
+        } else {
+            guard.pos = new_pos;
+        }
+        if (std::ranges::find(sequence, guard) != sequence.end()) return true;
+    }
+    return false;
+}
 
 int main(int argc, char* argv[])
 {
@@ -103,7 +122,7 @@ int main(int argc, char* argv[])
     auto map_height = std::ssize(input);
     auto map_width = std::ssize(input.front());
 
-    auto guard = [&]() -> Guard {
+    const auto guard = [&]() -> Guard {
         for (std::int64_t y = 0; y < map_height; ++y) {
             auto found_guard = input[y].find(kGuardSymbol);
             if (found_guard == std::string::npos) continue;
@@ -121,19 +140,32 @@ int main(int argc, char* argv[])
         return {};
     }();
 
-    while (is_inside(input, guard.pos)) {
-        auto new_pos = guard.pos + guard.dir;
-        if (is_obstruction(input, new_pos)) {
-            guard.dir = rotate(guard.dir);
-        } else {
-            guard.pos = new_pos;
-            input[new_pos.y][new_pos.x] = kCheckedSymbol;
+    {
+        auto checking_guard = guard;
+        while (is_inside(input, checking_guard.pos)) {
+            auto new_pos = checking_guard.pos + checking_guard.dir;
+            if (is_obstruction(input, new_pos)) {
+                checking_guard.dir = rotate(checking_guard.dir);
+            } else {
+                checking_guard.pos = new_pos;
+                input[new_pos.y][new_pos.x] = kCheckedSymbol;
+            }
         }
     }
 
-    auto result = std::ranges::fold_left(std::views::join(input), 0, [](const auto& sum, const auto& character) {
-        return sum + (character == kCheckedSymbol ? 1 : 0);
-    });
+    std::int64_t result{0};
+    for (std::int64_t y = 0; y < map_height; ++y) {
+        for (std::int64_t x = 0; x < map_width; ++x) {
+            if (input[y][x] != kCheckedSymbol) continue;
+            if (is_obstruction(input, Coord{.y = y, .x = x})) continue;
+            input[y][x] = kObstructionsSymbol;
+            if (is_loop(input, guard)) {
+                ++result;
+            }
+            input[y][x] = kNormalSymbol;
+        }
+    }
+
     std::cout << result << std::endl;
     return 0;
 }
