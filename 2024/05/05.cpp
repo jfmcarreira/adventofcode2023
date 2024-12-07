@@ -93,6 +93,39 @@ auto validate(const Rules& rules, std::span<const std::int64_t> sequence) noexce
     return true;
 }
 
+auto order_sequence(const Rules& rules, std::vector<std::int64_t> sequence) noexcept
+{
+    auto process = [&]() {
+        for (std::int64_t page_index = 0; page_index < sequence.size(); ++page_index) {
+            auto page_number = sequence[page_index];
+
+            auto found_page = rules.find(page_number);
+            assert(found_page != rules.end());
+            const auto& rule = found_page->second;
+
+            for (std::int64_t i = 0; i < page_index; ++i) {
+                if (std::ranges::find(rule.before, sequence[i]) != rule.before.end()) {
+                    std::swap(sequence[page_index], sequence[i]);
+                    return false;
+                }
+            }
+
+            for (std::int64_t i = page_index + 1; i < sequence.size(); ++i) {
+                if (std::ranges::find(rule.after, sequence[i]) != rule.after.end()) {
+                    std::swap(sequence[page_index], sequence[i]);
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    while (1) {
+        if (process()) break;
+    }
+    return sequence;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
@@ -122,9 +155,14 @@ int main(int argc, char* argv[])
         }
     });
 
+    for (auto& sequence : page_sequences) {
+        order_sequence(order_rules, sequence);
+    }
+
     auto result = std::ranges::fold_left(page_sequences, 0, [&](const std::int64_t& sum, const auto& sequence) {
-        if (!validate(order_rules, sequence)) return sum;
-        return sum + sequence[sequence.size() / 2];
+        if (validate(order_rules, sequence)) return sum;
+        auto new_sequence = order_sequence(order_rules, sequence);
+        return sum + new_sequence[new_sequence.size() / 2];
     });
     std::cout << result << std::endl;
     return 0;
