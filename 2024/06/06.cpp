@@ -1,11 +1,9 @@
-#include <__algorithm/fold.h>
 
 #include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
 #include <ostream>
-#include <ranges>
 #include <set>
 #include <span>
 #include <string>
@@ -13,15 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-template<typename F>
-auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
-{
-    std::ifstream input_file(file_name, std::ios_base::in);
-    std::string line;
-    while (std::getline(input_file, line)) {
-        parsing(line);
-    }
-}
+#include "../common.hpp"
 
 constexpr auto kGuardSymbol = '^';
 constexpr auto kNormalSymbol = '.';
@@ -29,35 +19,6 @@ constexpr auto kObstructionsSymbol = '#';
 constexpr auto kCheckedSymbol = 'X';
 
 using Input = std::vector<std::string>;
-
-struct Coord
-{
-    std::int64_t y{0};
-    std::int64_t x{0};
-
-    auto operator==(const Coord&) const noexcept -> bool = default;
-};
-
-struct Direction
-{
-    std::int64_t x{0};
-    std::int64_t y{0};
-
-    auto operator==(const Direction&) const noexcept -> bool = default;
-};
-
-auto operator+(const Coord& coord, const Direction& dir) noexcept
-{
-    return Coord{.y = coord.y + dir.y, .x = coord.x + dir.x};
-}
-
-auto operator*(const Direction& dir, std::int64_t scale) noexcept
-{
-    return Direction{
-        .x = dir.x * scale,
-        .y = dir.y * scale,
-    };
-}
 
 auto rotate(const Direction& dir) noexcept
 {

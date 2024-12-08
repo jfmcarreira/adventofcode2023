@@ -13,15 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-template<typename F>
-auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
-{
-    std::ifstream input_file(file_name, std::ios_base::in);
-    std::string line;
-    while (std::getline(input_file, line)) {
-        parsing(line);
-    }
-}
+#include "../common.hpp"
 
 enum class Parsing
 {
@@ -36,17 +28,6 @@ struct Ordering
 };
 
 using Rules = std::unordered_map<std::int64_t, Ordering>;
-
-auto check_numbers(std::string_view line) noexcept -> std::pair<std::int64_t, std::optional<std::int64_t>>
-{
-    if (line.empty()) return std::make_pair(0, std::nullopt);
-    if (!std::isdigit(line[0])) return std::make_pair(1, std::nullopt);
-    std::size_t index{1};
-    for (; index < line.size(); ++index) {
-        if (!std::isdigit(line[index])) break;
-    }
-    return std::make_pair(index, std::stoll(line.substr(0, index).data()));
-}
 
 auto parse_order(std::string_view input) noexcept
 {

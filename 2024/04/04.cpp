@@ -5,41 +5,17 @@
 #include <string_view>
 #include <vector>
 
-template<typename F>
-auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
-{
-    std::ifstream input_file(file_name, std::ios_base::in);
-    std::string line;
-    while (std::getline(input_file, line)) {
-        parsing(line);
-    }
-}
+#include "../common.hpp"
 
 constexpr std::string_view kLookupWord{"MAS"};
 
 using Input = std::vector<std::string>;
-
-struct Coord
-{
-    std::int64_t y{0};
-    std::int64_t x{0};
-
-    auto operator==(const Coord&) const noexcept -> bool = default;
-};
 
 auto operator<(const Coord& lhs, const Coord& rhs) noexcept
 {
     if (lhs.y == rhs.y) return lhs.x < rhs.x;
     return lhs.y < rhs.y;
 }
-
-struct Direction
-{
-    std::int64_t x{0};
-    std::int64_t y{0};
-
-    auto operator==(const Direction&) const noexcept -> bool = default;
-};
 
 constexpr std::array kDirections{
     Direction{0, -1},
@@ -76,19 +52,6 @@ auto operator<(const Word& lhs, const Word& rhs) noexcept
     auto rhs_diagonal = is_diagonal(rhs.dir);
     if (lhs_diagonal != rhs_diagonal) return lhs_diagonal;
     return false;
-}
-
-auto operator+(const Coord& coord, const Direction& dir) noexcept
-{
-    return Coord{.y = coord.y + dir.y, .x = coord.x + dir.x};
-}
-
-auto operator*(const Direction& dir, std::int64_t scale) noexcept
-{
-    return Direction{
-        .x = dir.x * scale,
-        .y = dir.y * scale,
-    };
 }
 
 auto is_inside(const Input& input, const Coord& pos) noexcept

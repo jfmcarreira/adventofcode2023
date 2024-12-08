@@ -14,15 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-template<typename F>
-auto parse_file(const std::filesystem::path& file_name, F&& parsing) noexcept
-{
-    std::ifstream input_file(file_name, std::ios_base::in);
-    std::string line;
-    while (std::getline(input_file, line)) {
-        parsing(line);
-    }
-}
+#include "../common.hpp"
 
 struct Comand
 {
