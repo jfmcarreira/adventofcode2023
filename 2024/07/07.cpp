@@ -32,9 +32,13 @@ struct Comand
 
 using Operation = std::function<std::int64_t(std::int64_t, std::int64_t)>;
 
-const std::array<Operation, 2> kOperations{
-    [](std::int64_t lhs, std::int64_t rhs) noexcept { return lhs + rhs; },
-    [](std::int64_t lhs, std::int64_t rhs) noexcept { return lhs * rhs; },
+const std::array kOperations{
+    Operation{[](std::int64_t lhs, std::int64_t rhs) noexcept { return lhs + rhs; }},
+    Operation{[](std::int64_t lhs, std::int64_t rhs) noexcept { return lhs * rhs; }},
+    Operation{[](std::int64_t lhs, std::int64_t rhs) noexcept {
+        auto base = std::floor(std::log10(rhs));
+        return lhs * pow(10, base + 1) + rhs;
+    }},
 };
 
 auto check_number(std::string_view input) noexcept -> std::pair<std::int64_t, std::optional<std::int64_t>>
