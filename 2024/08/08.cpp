@@ -1,9 +1,6 @@
-#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include <iterator>
-#include <memory>
 #include <ostream>
 #include <ranges>
 #include <set>
@@ -88,17 +85,16 @@ int main(int argc, char* argv[])
     auto antenna_pairs = antenna_pairing(antennas);
 
     std::set<Coord> antinodes;
-
     for (const auto& [src, dest] : antenna_pairs) {
-
         auto add_antinode = [&](const auto& start, const auto& dir, const auto& other) {
-            auto target = start->pos + dir;
-            if (!is_inside(map, target)) return;
-            if (target == start->pos) return;
-            if (target == other->pos) return;
-            antinodes.insert(target);
+            auto multiplier{1};
+            while (1) {
+                auto target = start->pos + dir * multiplier;
+                ++multiplier;
+                if (!is_inside(map, target)) return;
+                antinodes.insert(target);
+            }
         };
-
         auto direction = src->pos - dest->pos;
         add_antinode(src, direction, dest);
         add_antinode(src, direction * -1, dest);
